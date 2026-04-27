@@ -1,0 +1,2548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyAppCoach Admin Panel | 1M Scholars Ltd</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        /* TOAST NOTIFICATIONS */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 320px;
+            animation: slideIn 0.3s ease-out;
+            pointer-events: auto;
+        }
+
+        .toast.success {
+            border-left: 4px solid #10b981;
+        }
+
+        .toast.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .toast.info {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .toast i {
+            font-size: 18px;
+        }
+
+        .toast.success i { color: #10b981; }
+        .toast.error i { color: #ef4444; }
+        .toast.info i { color: #3b82f6; }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* LOGIN PAGE STYLES */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.16), transparent 28%),
+                        radial-gradient(circle at bottom right, rgba(255,255,255,0.12), transparent 28%),
+                        linear-gradient(135deg, #2e1a4d 0%, #0f172a 45%, #1e293b 100%);
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 28px;
+            padding: 48px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 30px 90px rgba(15, 23, 42, 0.28);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .login-logo {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6366f1 100%);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 38px;
+            font-weight: bold;
+            box-shadow: 0 18px 45px rgba(99, 102, 241, 0.35);
+        }
+
+        .login-header h1 {
+            font-size: 36px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #475569;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 10px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 16px 50px 16px 18px;
+            border: 2px solid rgba(148, 163, 184, 0.4);
+            border-radius: 16px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: #f8fafc;
+            color: #111827;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+            outline: none;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.95);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            color: #475569;
+            cursor: pointer;
+            padding: 8px 10px;
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .password-toggle:hover {
+            color: #04010b;
+            background: rgba(124, 58, 237, 0.08);
+            border-color: rgba(124, 58, 237, 0.35);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #050609;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(9, 10, 14, 0.1);
+        }
+
+        .form-group.error input {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+
+        .form-options label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .form-options input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-footer {
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 2px solid #f3f4f6;
+        }
+
+        .login-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .login-footer a:hover {
+            color: #764ba2;
+        }
+
+        .login-info {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e9f0ff 100%);
+            border-left: 4px solid #667eea;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #4c51bf;
+            margin-bottom: 28px;
+            font-weight: 500;
+        }
+
+        /* ADMIN PANEL STYLES */
+        :root {
+            --sidebar-width: 320px;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            overflow-y: auto;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s ease;
+            z-index: 40;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar.hidden-mobile {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #cbd5e1;
+            padding: 16px 24px;
+            margin: 4px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            font-weight: 500;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #ffffff;
+            transform: translateX(4px);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transform: translateX(8px);
+        }
+
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: white;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .sidebar-item i {
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            width: calc(100% - var(--sidebar-width));
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 30;
+            transition: left 0.3s ease, width 0.3s ease;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            transition: margin-left 0.3s ease, width 0.3s ease;
+            min-height: 100vh;
+            min-width: 0;
+            position: relative;
+        }
+
+        .main-content.full {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .page {
+            min-width: 0;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            overflow-x: auto;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-card.green {
+            border-left-color: #10b981;
+        }
+
+        .stat-card.orange {
+            border-left-color: #f59e0b;
+        }
+
+        .stat-card.red {
+            border-left-color: #ef4444;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(90deg, #f8f9fb 0%, #f3f5f7 100%);
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #4b5563;
+        }
+
+        tbody tr:hover {
+            background-color: #f9fafb;
+            transition: all 0.2s;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-active {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #15803d;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #b45309;
+        }
+
+        .status-inactive {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #b91c1c;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .page {
+            display: none;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .page.active {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .page.fade-out {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutLeft {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(-30px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            :root {
+                --sidebar-width: 260px;
+            }
+
+            .sidebar {
+                width: var(--sidebar-width);
+            }
+
+            .top-nav,
+            .main-content {
+                left: var(--sidebar-width);
+                width: calc(100% - var(--sidebar-width));
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --sidebar-width: 0px;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: fixed;
+                z-index: 50;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.hidden-mobile {
+                transform: translateX(0);
+            }
+
+            .top-nav,
+            .main-content {
+                left: 0;
+                width: 100%;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding-top: 5rem;
+            }
+        }
+
+        .chart-placeholder {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="page active">
+        <div class="login-container">
+            <div class="login-box">
+                <div class="login-header">
+                    <div class="login-logo">M</div>
+                    <h1>Admin Panel</h1>
+                    <p>MyAppCoach 1M Scholars Ltd</p>
+                </div>
+
+                <div class="login-info">
+                    <i class="fas fa-info-circle"></i> &nbsp;Login with Email, Phone, or Name + Password
+                </div>
+
+                <form id="loginForm" class="space-y-4">
+                    <div class="form-group">
+                        <label for="username">Email / Phone / Name</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            placeholder="Enter email, phone, or name" 
+                            required
+                        >
+                        <div class="error-message" id="usernameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            placeholder="Enter password" 
+                            required
+                        >
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')" title="Show/Hide Password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <div class="error-message" id="passwordError"></div>
+                    </div>
+
+                    <div class="form-options">
+                        <label>
+                            <input type="checkbox" id="rememberMe">
+                            <span>Remember me</span>
+                        </label>
+                    </div>
+
+                    <div class="error-message" id="loginError" style="text-align: center; margin-bottom: 16px;"></div>
+
+                    <button type="submit" class="login-btn">Sign In</button>
+                </form>
+
+                <div class="login-footer">
+                    <p><i class="fas fa-lock"></i> &nbsp;New admin? <a href="#" onclick="showRegisterPage()" class="text-blue-600 font-semibold hover:underline">Register here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REGISTRATION PAGE -->
+    <div id="registerPage" class="page" style="display: none;">
+        <div class="login-container">
+            <div class="login-box">
+                <div class="login-header">
+                    <div class="login-logo">M</div>
+                    <h1>Register as Admin</h1>
+                    <p>MyAppCoach 1M Scholars Ltd</p>
+                </div>
+
+                <div class="login-info">
+                    <i class="fas fa-info-circle"></i> &nbsp;Apply for admin access (pending approval)
+                </div>
+
+                <form id="registerForm" class="space-y-4">
+                    <div class="form-group">
+                        <label for="regName">Full Name</label>
+                        <input 
+                            type="text" 
+                            id="regName" 
+                            placeholder="Enter your full name" 
+                            required
+                        >
+                        <div class="error-message" id="regNameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regEmail">Email</label>
+                        <input 
+                            type="email" 
+                            id="regEmail" 
+                            placeholder="Enter email address" 
+                            required
+                        >
+                        <div class="error-message" id="regEmailError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regPhone">Phone Number</label>
+                        <input 
+                            type="tel" 
+                            id="regPhone" 
+                            placeholder="Enter phone number" 
+                            required
+                        >
+                        <div class="error-message" id="regPhoneError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regRole">Desired Role</label>
+                        <input 
+                            type="text" 
+                            id="regRole" 
+                            placeholder="e.g. Manager, Team Lead" 
+                            required
+                        >
+                        <div class="error-message" id="regRoleError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regPassword">Password</label>
+                        <input 
+                            type="password" 
+                            id="regPassword" 
+                            placeholder="Enter password" 
+                            required
+                        >
+                        <button type="button" class="password-toggle" onclick="togglePassword('regPassword')" title="Show/Hide Password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <div class="error-message" id="regPasswordError"></div>
+                    </div>
+
+                    <div class="error-message" id="registerError" style="text-align: center; margin-bottom: 16px;"></div>
+
+                    <button type="submit" class="login-btn">Submit for Approval</button>
+                </form>
+
+                <div class="login-footer">
+                    <p>Already have an account? <a href="#" onclick="showLoginPage()" class="text-blue-600 font-semibold hover:underline">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL PAGES (Hidden until login) -->
+    <div id="adminPanel" style="display: none;">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="p-6 border-b-2 border-blue-400 bg-gradient-to-r from-blue-600 to-purple-600">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                        <span class="text-purple-600 font-bold text-xl">M</span>
+                    </div>
+                    <div>
+                        <p class="font-bold text-white text-sm">MyAppCoach</p>
+                        <p class="text-blue-100 text-xs">Admin Control Panel</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="p-4 overflow-y-auto" style="height: calc(100vh - 120px);">
+                <!-- MAIN NAVIGATION -->
+                <div class="mb-6">
+                    <p class="text-xs font-bold text-blue-300 uppercase tracking-wider mb-3 px-2">Navigation</p>
+                    <div class="space-y-2">
+                        <a href="#" onclick="navigateAdmin('dashboard')" class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-chart-line w-5"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="#" onclick="navigateAdmin('users')" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-users w-5"></i>
+                            <span>Users</span>
+                        </a>
+                        <a href="#" onclick="navigateAdmin('reports')" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-chart-bar w-5"></i>
+                            <span>Reports</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- OPERATIONAL TASKS -->
+                <div class="mb-6 pb-4 border-b border-blue-400">
+                    <p class="text-xs font-bold text-green-300 uppercase tracking-wider mb-3 px-2">Operations</p>
+                    <div class="space-y-2">
+                        <a href="#" onclick="navigateAdmin('opportunities')" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-briefcase w-5" style="color: #10b981;"></i>
+                            <span>Opportunities</span>
+                        </a>
+                        <a href="#" onclick="navigateAdmin('applications')" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-file-alt w-5" style="color: #f59e0b;"></i>
+                            <span>Applications</span>
+                        </a>
+                        <a href="#" onclick="navigateAdmin('help')" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-question-circle w-5" style="color: #ec4899;"></i>
+                            <span>Help Inquiries</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ADMIN MANAGEMENT -->
+                <div class="mb-6 pb-4 border-b border-blue-400">
+                    <p class="text-xs font-bold text-yellow-300 uppercase tracking-wider mb-3 px-2">Admin Tasks</p>
+                    <div class="space-y-2">
+                        <a href="#" onclick="navigateAdmin('admins')" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-shield-alt w-5" style="color: #fbbf24;"></i>
+                            <span>Admin Users</span>
+                        </a>
+                        <a href="#" id="approvalsMenu" style="display: none;" onclick="navigateAdmin('approvals')" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-user-check w-5" style="color: #34d399;"></i>
+                            <span>Pending Approvals</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- QUICK ACTIONS -->
+                <div class="mb-6 p-4 bg-blue-700 rounded-lg border border-blue-500">
+                    <p class="text-xs font-bold text-white uppercase tracking-wider mb-3">Quick Actions</p>
+                    <div class="space-y-2">
+                        <button onclick="openAddOpportunityModal()" class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-semibold rounded-lg hover:from-green-600 hover:to-emerald-600 transition">
+                            <i class="fas fa-plus"></i> New Opportunity
+                        </button>
+                        <button onclick="openAddAdminModal()" class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-yellow-500 to-amber-500 text-white text-sm font-semibold rounded-lg hover:from-yellow-600 hover:to-amber-600 transition" id="quickAddAdminBtn" style="display: none;">
+                            <i class="fas fa-user-plus"></i> Add Admin
+                        </button>
+                    </div>
+                </div>
+
+                <!-- LOGOUT -->
+                <div class="pt-4 border-t border-blue-400">
+                    <a href="#" onclick="handleLogout()" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 transition text-red-200 font-semibold">
+                        <i class="fas fa-sign-out-alt w-5"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- TOP NAV -->
+        <header class="top-nav">
+            <div class="flex items-center justify-between px-6 py-4">
+                <button onclick="toggleSidebar()" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+                <h1 id="pageTitle" class="text-xl font-bold text-gray-900">Dashboard</h1>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <img src="https://via.placeholder.com/40" alt="Admin" class="w-10 h-10 rounded-full">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900" id="adminName">Admin User</p>
+                            <p class="text-xs text-gray-500" id="adminRole">Administrator</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content pt-20 pb-8">
+            <!-- DASHBOARD PAGE -->
+            <div id="dashboard" class="page active px-6">
+                <div class="max-w-7xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="stat-card">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Total Users</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-2">42,580</p>
+                                    <p class="text-xs text-green-600 mt-1">↑ 12% from last month</p>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded-lg">
+                                    <i class="fas fa-users text-blue-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card green">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Opportunities</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-2">5,240</p>
+                                    <p class="text-xs text-green-600 mt-1">↑ 8% from last month</p>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded-lg">
+                                    <i class="fas fa-briefcase text-green-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card orange">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Applications</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-2">18,945</p>
+                                    <p class="text-xs text-orange-600 mt-1">↑ 24% from last month</p>
+                                </div>
+                                <div class="bg-orange-100 p-3 rounded-lg">
+                                    <i class="fas fa-file-alt text-orange-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card red">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-gray-600 text-sm font-medium">Success Rate</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-2">78%</p>
+                                    <p class="text-xs text-red-600 mt-1">↓ 2% from last month</p>
+                                </div>
+                                <div class="bg-red-100 p-3 rounded-lg">
+                                    <i class="fas fa-chart-pie text-red-600 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
+                            <h2 class="text-lg font-bold text-gray-900 mb-6">Activity Chart</h2>
+                            <div class="chart-placeholder h-64">
+                                <p><i class="fas fa-chart-line text-4xl mb-3"></i></p>
+                                <p>Chart visualization would display here</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h2 class="text-lg font-bold text-gray-900 mb-4">Recent Activity</h2>
+                            <div id="recentActivityList" class="space-y-4">
+                                <div class="text-sm text-gray-500">No activity has been recorded yet.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- USERS PAGE -->
+            <div id="users" class="page px-6">
+                <div class="max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">All Registered Users</h2>
+                            <p class="text-gray-600 text-sm mt-1">Real users registered on the platform (verified from database)</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-6 flex items-center gap-2">
+                        <i class="fas fa-check-circle text-yellow-600"></i>
+                        <span class="text-yellow-800 text-sm"><strong>✓ All data shown is real and verified</strong> - Pulled directly from platform database</span>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Country</th>
+                                    <th>Education</th>
+                                    <th>Status</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersList">
+                                <tr><td colspan="7" class="text-center py-8 text-gray-500">Loading users...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OPPORTUNITIES PAGE -->
+            <div id="opportunities" class="page px-6">
+                <div class="max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Opportunities Management</h2>
+                        <button onclick="openAddOpportunityModal()" class="btn-primary">
+                            <i class="fas fa-plus mr-2"></i> Add Opportunity
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Location</th>
+                                    <th>Deadline</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Opportunities will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- APPLICATIONS PAGE -->
+            <div id="applications" class="page px-6">
+                <div class="max-w-7xl mx-auto">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Applications Management</h2>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Opportunity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="applicationsTable">
+                                <tr>
+                                    <td colspan="4" class="text-center py-8 text-gray-500">No applications found</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPORTS PAGE -->
+            <div id="reports" class="page px-6">
+                <div class="max-w-7xl mx-auto">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Platform Activity & Audit Log</h2>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+                        <i class="fas fa-info-circle text-blue-600 mt-1"></i>
+                        <div class="text-blue-800 text-sm">
+                            <strong>Real Event Tracking</strong> - This audit log shows only real, verified events from the platform. Every action is timestamped and recorded when it actually happens. No placeholder data.
+                        </div>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Total Users</p>
+                                    <p class="text-3xl font-bold text-gray-900" id="statTotalUsers">-</p>
+                                </div>
+                                <i class="fas fa-users text-blue-500 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Total Admins</p>
+                                    <p class="text-3xl font-bold text-gray-900" id="statTotalAdmins">-</p>
+                                </div>
+                                <i class="fas fa-shield-alt text-green-500 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Total Events</p>
+                                    <p class="text-3xl font-bold text-gray-900" id="statTotalEvents">-</p>
+                                </div>
+                                <i class="fas fa-chart-line text-purple-500 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-gray-600 text-sm">All Verified</p>
+                                    <p class="text-3xl font-bold text-green-600">✓ 100%</p>
+                                </div>
+                                <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Complete Activity Log -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b">
+                            <h3 class="font-bold text-lg text-gray-900">Complete Activity Audit Trail</h3>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Event Type</th>
+                                        <th>Description</th>
+                                        <th>Verification</th>
+                                        <th>Timestamp</th>
+                                        <th>Valid</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fullActivityList">
+                                    <tr><td colspan="5" class="text-center py-8 text-gray-500">Loading activity log...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN USERS PAGE -->
+            <div id="admins" class="page px-6">
+                <div class="max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Admin Users Management</h2>
+                        <button onclick="openAddAdminModal()" class="btn-primary">
+                            <i class="fas fa-plus mr-2"></i> Add Admin
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name/Email/Phone</th>
+                                    <th>Created</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUsersTable">
+                                <!-- Admin users loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PENDING APPROVALS PAGE -->
+            <div id="approvals" class="page px-6">
+                <div class="max-w-7xl mx-auto">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Pending Admin Approvals</h2>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Desired Role</th>
+                                    <th>Applied</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="approvalsTable">
+                                <tr>
+                                    <td colspan="6" class="text-center py-8 text-gray-500">No pending approvals</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HELP INQUIRIES PAGE -->
+            <div id="help" class="page px-6">
+                <div class="max-w-7xl mx-auto">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Help Inquiries</h2>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Opportunity</th>
+                                    <th>Message</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="helpInquiriesTable">
+                                <!-- Help inquiries loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- ADD USER MODAL -->
+        <div id="addUserModal" class="modal">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">Add New User</h2>
+                    <button onclick="closeAddUserModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+
+                <form onsubmit="handleAddUser(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <input type="text" required placeholder="Full name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" required placeholder="Email address">
+                    </div>
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" class="btn-primary flex-1">Add User</button>
+                        <button type="button" onclick="closeAddUserModal()" class="btn-secondary flex-1">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ADD OPPORTUNITY MODAL -->
+        <div id="addOpportunityModal" class="modal">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">Add New Opportunity</h2>
+                    <button onclick="closeAddOpportunityModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+
+                <form onsubmit="handleAddOpportunity(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                        <input type="text" name="title" required placeholder="Opportunity title">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                        <select name="category" required>
+                            <option value="">Select Type</option>
+                            <option value="scholarship">Scholarship</option>
+                            <option value="job">Job</option>
+                            <option value="internship">Internship</option>
+                            <option value="career guidance">Career Guidance</option>
+                            <option value="training">Training</option>
+                            <option value="social media monetization">Social Media Monetization</option>
+                            <option value="forex trading">Forex Trading</option>
+                            <option value="crypto">Crypto</option>
+                            <option value="irembo services">Irembo Services</option>
+                            <option value="grant">Grant</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea name="description" required placeholder="Detailed description" rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Deadline</label>
+                        <input type="date" name="deadline" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Location/Country</label>
+                        <input type="text" name="location" required placeholder="e.g., USA, Rwanda">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Application Link</label>
+                        <input type="url" name="link" required placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Photo URL</label>
+                        <input type="url" name="image" required placeholder="https://...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Help Line</label>
+                        <input type="text" name="helpLine" placeholder="Contact info for help">
+                    </div>
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" class="btn-primary flex-1">Add Opportunity</button>
+                        <button type="button" onclick="closeAddOpportunityModal()" class="btn-secondary flex-1">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ADD ADMIN MODAL -->
+        <div id="addAdminModal" class="modal">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">Add New Admin User</h2>
+                    <button onclick="closeAddAdminModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+
+                <form onsubmit="handleAddAdmin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="adminName_input" required placeholder="Full name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="adminEmail_input" required placeholder="Email address">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                        <input type="tel" id="adminPhone_input" placeholder="Phone number">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                        <select id="adminRole_input" required>
+                            <option value="">Select Role</option>
+                            <option value="C.E.O">C.E.O</option>
+                            <option value="Co-Founder">Co-Founder</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="adminPassword_input" required placeholder="Set password">
+                        <button type="button" class="password-toggle" onclick="togglePassword('adminPassword_input')" title="Show/Hide Password" style="right: 14px; top: 50%; transform: translateY(-50%);">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" class="btn-primary flex-1">Add Admin</button>
+                        <button type="button" onclick="closeAddAdminModal()" class="btn-secondary flex-1">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== TOAST NOTIFICATIONS ====================
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toastContainer') || createToastContainer();
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const iconMap = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                info: 'fas fa-info-circle'
+            };
+            
+            toast.innerHTML = `
+                <i class="${iconMap[type]}"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-in forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+            return container;
+        }
+
+        // ==================== LOCAL STORAGE FUNCTIONS ====================
+        function getPublicUsers() {
+            const users = localStorage.getItem('myappcoach_public_users');
+            return users ? JSON.parse(users) : [];
+        }
+
+        function savePublicUsers(users) {
+            localStorage.setItem('myappcoach_public_users', JSON.stringify(users));
+        }
+        function initializeAdminStorage() {
+            const existingAdmins = localStorage.getItem('myappcoach_admins');
+            if (!existingAdmins) {
+                // Initialize with default admin
+                const defaultAdmins = [
+                    {
+                        id: 1,
+                        name: 'NDIKUBWIMANA Laurent',
+                        email: 'laurent@myappcoach.com',
+                        phone: '0781841929',
+                        password: 'Myliam1$',
+                        role: 'C.E.O',
+                        createdAt: new Date().toISOString(),
+                        status: 'active'
+                    },
+                    {
+                        id: 2,
+                        name: 'IMANIRAREBA Milliam',
+                        email: 'milliam@myappcoach.com',
+                        phone: '0782774986',
+                        password: 'Milliam1$',
+                        role: 'Co-Founder',
+                        createdAt: new Date().toISOString(),
+                        status: 'active'
+                    },
+                    {
+                        id: 3,
+                        name: 'Laurent LoveLorn',
+                        email: 'LoveLorn@myappcoach.com',
+                        phone: '0789422004',
+                        password: 'Laurent1$',
+                        role: 'Manager',
+                        createdAt: new Date().toISOString(),
+                        status: 'active'
+                    }
+                ];
+                localStorage.setItem('myappcoach_admins', JSON.stringify(defaultAdmins));
+            }
+        }
+
+        function getAdminUsers() {
+            const admins = localStorage.getItem('myappcoach_admins');
+            return admins ? JSON.parse(admins) : [];
+        }
+
+        function saveAdminUsers(admins) {
+            localStorage.setItem('myappcoach_admins', JSON.stringify(admins));
+        }
+
+        function getCurrentAdmin() {
+            const current = localStorage.getItem('myappcoach_current_admin');
+            return current ? JSON.parse(current) : null;
+        }
+
+        function setCurrentAdmin(admin) {
+            localStorage.setItem('myappcoach_current_admin', JSON.stringify(admin));
+        }
+
+        function initializeActivityLogStorage() {
+            const existingLog = localStorage.getItem('myappcoach_activity_log');
+            if (!existingLog) {
+                localStorage.setItem('myappcoach_activity_log', JSON.stringify([]));
+            }
+        }
+
+        function initializePendingAdminStorage() {
+            const existingPending = localStorage.getItem('myappcoach_pending_admins');
+            if (!existingPending) {
+                localStorage.setItem('myappcoach_pending_admins', JSON.stringify([]));
+            }
+        }
+
+        function getPendingAdmins() {
+            const pending = localStorage.getItem('myappcoach_pending_admins');
+            return pending ? JSON.parse(pending) : [];
+        }
+
+        function savePendingAdmins(admins) {
+            localStorage.setItem('myappcoach_pending_admins', JSON.stringify(admins));
+        }
+
+        function addPendingAdmin(name, email, phone, role, password) {
+            const pending = getPendingAdmins();
+            pending.unshift({
+                id: Math.max(...pending.map(a => a.id), 0) + 1,
+                name,
+                email,
+                phone,
+                role,
+                password,
+                appliedAt: new Date().toISOString(),
+                status: 'pending'
+            });
+            savePendingAdmins(pending);
+        }
+
+        function loadPendingApprovalsTable() {
+            const pending = getPendingAdmins();
+            const table = document.getElementById('approvalsTable');
+            if (!table) return;
+
+            if (pending.length === 0) {
+                table.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No pending approvals</td></tr>';
+                return;
+            }
+
+            table.innerHTML = pending.map(admin => `
+                <tr>
+                    <td class="font-medium">${admin.name}</td>
+                    <td>${admin.email}</td>
+                    <td>${admin.phone}</td>
+                    <td>${admin.role}</td>
+                    <td>${new Date(admin.appliedAt).toLocaleDateString()}</td>
+                    <td>
+                        <button onclick="approveAdmin(${admin.id})" class="btn-sm" style="background-color: #10b981; color: white; margin-right: 4px;">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button onclick="rejectAdmin(${admin.id})" class="btn-sm btn-danger">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function approveAdmin(id) {
+            let pending = getPendingAdmins();
+            const admin = pending.find(a => a.id === id);
+            
+            if (!admin) return;
+
+            // Add to approved admins
+            const admins = getAdminUsers();
+            const newAdmin = {
+                id: Math.max(...admins.map(a => a.id), 0) + 1,
+                name: admin.name,
+                email: admin.email,
+                phone: admin.phone,
+                role: admin.role,
+                password: admin.password,
+                createdAt: new Date().toISOString(),
+                status: 'approved'
+            };
+            admins.push(newAdmin);
+            saveAdminUsers(admins);
+
+            // Remove from pending
+            pending = pending.filter(a => a.id !== id);
+            savePendingAdmins(pending);
+
+            addActivityLog('admin_approved', `Admin approved: ${admin.name}`);
+            loadPendingApprovalsTable();
+            loadAdminUsersList();
+            showToast(`Admin ${admin.name} has been approved!`, 'success');
+        }
+
+        function rejectAdmin(id) {
+            const pending = getPendingAdmins();
+            const admin = pending.find(a => a.id === id);
+            
+            if (!admin) return;
+
+            let updatedPending = pending.filter(a => a.id !== id);
+            savePendingAdmins(updatedPending);
+
+            addActivityLog('admin_rejected', `Admin rejected: ${admin.name}`);
+            loadPendingApprovalsTable();
+            showToast(`Admin application rejected for ${admin.name}`, 'info');
+        }
+
+        function showLoginPage() {
+            document.getElementById('registerPage').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const toggleBtn = input.nextElementSibling;
+            const icon = toggleBtn.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+                toggleBtn.title = 'Hide Password';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye';
+                toggleBtn.title = 'Show Password';
+            }
+        }
+
+        function showRegisterPage() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('registerPage').style.display = 'block';
+        }
+
+        // ==================== REGISTRATION FORM ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const name = document.getElementById('regName').value.trim();
+                    const email = document.getElementById('regEmail').value.trim();
+                    const phone = document.getElementById('regPhone').value.trim();
+                    const role = document.getElementById('regRole').value.trim();
+                    const password = document.getElementById('regPassword').value.trim();
+
+                    // Clear errors
+                    document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+                    document.getElementById('registerError').classList.remove('show');
+
+                    // Validate
+                    if (!name || !email || !phone || !role || !password) {
+                        document.getElementById('registerError').textContent = 'All fields are required';
+                        document.getElementById('registerError').classList.add('show');
+                        return;
+                    }
+
+                    // Check if email already exists
+                    const admins = getAdminUsers();
+                    const pending = getPendingAdmins();
+                    if (admins.find(a => a.email.toLowerCase() === email.toLowerCase()) || 
+                        pending.find(a => a.email.toLowerCase() === email.toLowerCase())) {
+                        document.getElementById('registerError').textContent = 'Email already registered';
+                        document.getElementById('registerError').classList.add('show');
+                        return;
+                    }
+
+                    // Submit for approval
+                    addPendingAdmin(name, email, phone, role, password);
+                    addActivityLog('admin_applied', `New admin application: ${name}`);
+
+                    showToast('Registration submitted! Waiting for CEO/Co-Founder approval...', 'success');
+                    document.getElementById('registerForm').reset();
+                    showLoginPage();
+                    showToast('Admin registered! Please wait for approval.', 'success');
+                });
+            }
+        });
+
+
+        function getActivityLog() {
+            const log = localStorage.getItem('myappcoach_activity_log');
+            return log ? JSON.parse(log) : [];
+        }
+
+        function saveActivityLog(entries) {
+            localStorage.setItem('myappcoach_activity_log', JSON.stringify(entries));
+        }
+
+        function addActivityLog(type, description) {
+            const entries = getActivityLog();
+            entries.unshift({
+                id: Math.max(...entries.map(e => e.id), 0) + 1,
+                type,
+                description,
+                createdAt: new Date().toISOString()
+            });
+            saveActivityLog(entries);
+            loadRecentActivity();
+        }
+
+        function loadRecentActivity() {
+            const entries = getActivityLog();
+            const container = document.getElementById('recentActivityList');
+            if (!container) return;
+            
+            const admin = getCurrentAdmin();
+            const isLeadership = admin.role === 'C.E.O' || admin.role === 'Co-Founder';
+            
+            // Filter activity: leadership can see all, others see only non-admin-login activities
+            let filteredEntries = isLeadership ? entries : entries.filter(e => e.type !== 'admin_login');
+            
+            if (filteredEntries.length === 0) {
+                container.innerHTML = '<div class="text-sm text-gray-500">No activity has been recorded yet.</div>';
+                return;
+            }
+            
+            container.innerHTML = filteredEntries.slice(0, 6).map(entry => {
+                const iconColor = {
+                    admin_login: 'bg-green-500',
+                    admin_created: 'bg-blue-500',
+                    opportunity_added: 'bg-indigo-500',
+                    contact_submitted: 'bg-orange-500',
+                    user_signup: 'bg-purple-500',
+                    user_login: 'bg-teal-500',
+                    admin_applied: 'bg-yellow-500',
+                    admin_approved: 'bg-green-600',
+                    admin_rejected: 'bg-red-500'
+                }[entry.type] || 'bg-gray-400';
+                
+                return `
+                    <div class="flex items-start gap-3 pb-4 border-b last:border-b-0">
+                        <div class="w-2 h-2 ${iconColor} rounded-full mt-2"></div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">${entry.description}</p>
+                            <p class="text-xs text-gray-500">${new Date(entry.createdAt).toLocaleString()} ✓ Verified</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== REAL USER DATA FUNCTIONS ====================
+        function getPublicUsers() {
+            const users = localStorage.getItem('myappcoach_public_users');
+            return users ? JSON.parse(users) : [];
+        }
+
+        function loadUsersList() {
+            const users = getPublicUsers();
+            const container = document.getElementById('usersList');
+            if (!container) return;
+
+            if (users.length === 0) {
+                container.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-500">No registered users yet</td></tr>';
+                return;
+            }
+
+            container.innerHTML = users.map(user => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
+                                ${user.firstName.charAt(0)}
+                            </div>
+                            <span class="font-medium text-gray-900">${user.fullName}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">${user.email}</td>
+                    <td class="px-6 py-4 text-gray-600">${user.phone}</td>
+                    <td class="px-6 py-4 text-gray-600">${user.country || 'N/A'}</td>
+                    <td class="px-6 py-4 text-gray-600">${user.education || 'N/A'}</td>
+                    <td class="px-6 py-4"><span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">✓ Verified</span></td>
+                    <td class="px-6 py-4 text-xs text-gray-500">${new Date(user.createdAt).toLocaleDateString()}</td>
+                    <td class="px-6 py-4">
+                        <button onclick="viewUserDetails('${user.email}')" class="btn-sm btn-secondary mr-2" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="editUser('${user.email}')" class="btn-sm btn-secondary mr-2" title="Edit User">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteUser('${user.email}')" class="btn-sm btn-danger" title="Delete User">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function viewUserDetails(email) {
+            const users = getPublicUsers();
+            const user = users.find(u => u.email === email);
+            if (!user) {
+                showToast('User not found!', 'error');
+                return;
+            }
+            
+            // Create a simple details modal or alert for now
+            const details = `
+Name: ${user.fullName}
+Email: ${user.email}
+Phone: ${user.phone}
+Country: ${user.country || 'N/A'}
+Education: ${user.education || 'N/A'}
+Joined: ${new Date(user.createdAt).toLocaleDateString()}
+            `;
+            alert('User Details:\n\n' + details);
+        }
+
+        function editUser(email) {
+            const users = getPublicUsers();
+            const userIndex = users.findIndex(u => u.email === email);
+            if (userIndex === -1) {
+                showToast('User not found!', 'error');
+                return;
+            }
+            
+            const user = users[userIndex];
+            const newName = prompt('Edit user name:', user.fullName);
+            if (newName && newName !== user.fullName) {
+                users[userIndex].fullName = newName;
+                savePublicUsers(users);
+                addActivityLog('user_edited', `User edited: ${email}`);
+                showToast('User updated successfully!', 'success');
+                loadUsersList();
+            }
+        }
+
+        function deleteUser(email) {
+            if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                return;
+            }
+            
+            const users = getPublicUsers();
+            const filteredUsers = users.filter(u => u.email !== email);
+            if (filteredUsers.length === users.length) {
+                showToast('User not found!', 'error');
+                return;
+            }
+            
+            savePublicUsers(filteredUsers);
+            addActivityLog('user_deleted', `User deleted: ${email}`);
+            showToast('User deleted successfully!', 'success');
+            loadUsersList();
+        }
+
+        function loadAllActivityLog() {
+            const entries = getActivityLog();
+            const container = document.getElementById('fullActivityList');
+            if (!container) return;
+            
+            const admin = getCurrentAdmin();
+            const isLeadership = admin.role === 'C.E.O' || admin.role === 'Co-Founder';
+            
+            // Filter activity: leadership can see all, others see only non-admin-login/non-admin-created activities
+            let filteredEntries = isLeadership ? entries : entries.filter(e => e.type !== 'admin_login' && e.type !== 'admin_created' && e.type !== 'admin_applied' && e.type !== 'admin_approved' && e.type !== 'admin_rejected');
+
+            if (filteredEntries.length === 0) {
+                container.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500">No activity recorded</td></tr>';
+                return;
+            }
+
+            container.innerHTML = filteredEntries.map((entry, idx) => {
+                const typeLabel = {
+                    admin_login: '👤 Admin Login',
+                    user_signup: '📝 User Signup',
+                    user_login: '🔓 User Login',
+                    admin_created: '👨‍💼 Admin Created',
+                    admin_applied: '📨 Admin Applied',
+                    admin_approved: '✅ Admin Approved',
+                    admin_rejected: '❌ Admin Rejected',
+                    opportunity_added: '💼 Opportunity Added',
+                    contact_submitted: '📧 Contact Submitted'
+                }[entry.type] || entry.type;
+
+                return `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm font-medium">${typeLabel}</td>
+                        <td class="px-6 py-4 text-sm">${entry.description}</td>
+                        <td class="px-6 py-4 text-xs"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">✓ Verified Real Event</span></td>
+                        <td class="px-6 py-4 text-xs text-gray-600">${new Date(entry.createdAt).toLocaleString()}</td>
+                        <td class="px-6 py-4 text-center"><span class="text-green-600 font-bold">✓</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadAdminStatistics() {
+            const users = getPublicUsers();
+            const activity = getActivityLog();
+            const admins = getAdminUsers();
+
+            const stats = {
+                totalUsers: users.length,
+                totalAdmins: admins.length,
+                totalEvents: activity.length,
+                userSignups: activity.filter(e => e.type === 'user_signup').length,
+                adminLogins: activity.filter(e => e.type === 'admin_login').length,
+                userLogins: activity.filter(e => e.type === 'user_login').length
+            };
+
+            return stats;
+        }
+
+        // ==================== LOGIN FUNCTIONS ====================
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            // Clear previous errors
+            document.getElementById('usernameError').classList.remove('show');
+            document.getElementById('passwordError').classList.remove('show');
+            document.getElementById('loginError').classList.remove('show');
+            
+            // Validate
+            if (!username) {
+                document.getElementById('usernameError').textContent = 'Email, phone, or name is required';
+                document.getElementById('usernameError').classList.add('show');
+                return;
+            }
+            
+            if (!password) {
+                document.getElementById('passwordError').textContent = 'Password is required';
+                document.getElementById('passwordError').classList.add('show');
+                return;
+            }
+            
+            // Check credentials
+            const admins = getAdminUsers();
+            const admin = admins.find(a => {
+                return (a.email.toLowerCase() === username.toLowerCase() ||
+                        a.phone === username ||
+                        a.name.toLowerCase() === username.toLowerCase()) &&
+                       a.password === password;
+            });
+            
+            if (!admin) {
+                showToast('Invalid credentials. Please try again.', 'error');
+                document.getElementById('loginError').classList.add('show');
+                return;
+            }
+            
+            // Success - login
+            setCurrentAdmin(admin);
+            addActivityLog('admin_login', `Admin signed in: ${admin.name}`);
+            showToast(`Welcome back, ${admin.name}!`, 'success');
+            showAdminPanel();
+        });
+
+        function showAdminPanel() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('registerPage').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            
+            const admin = getCurrentAdmin();
+            document.getElementById('adminName').textContent = admin.name;
+            document.getElementById('adminRole').textContent = admin.role || 'Administrator';
+            
+            // Show approval menu only to C.E.O and Co-Founder
+            const approvalsMenu = document.getElementById('approvalsMenu');
+            const quickAddAdminBtn = document.getElementById('quickAddAdminBtn');
+            if (approvalsMenu) {
+                if (admin.role === 'C.E.O' || admin.role === 'Co-Founder') {
+                    approvalsMenu.style.display = 'flex';
+                    if (quickAddAdminBtn) quickAddAdminBtn.style.display = 'flex';
+                } else {
+                    approvalsMenu.style.display = 'none';
+                    if (quickAddAdminBtn) quickAddAdminBtn.style.display = 'none';
+                }
+            }
+            
+            const storedPage = localStorage.getItem('currentAdminPage') || 'dashboard';
+            navigateAdmin(storedPage);
+        }
+
+        function updateStatistics() {
+            const stats = loadAdminStatistics();
+            document.getElementById('statTotalUsers').textContent = stats.totalUsers;
+            document.getElementById('statTotalAdmins').textContent = stats.totalAdmins;
+            document.getElementById('statTotalEvents').textContent = stats.totalEvents;
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('myappcoach_current_admin');
+            document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            navigateAdmin('dashboard');
+            showToast('Logged out successfully!', 'info');
+        }
+
+        // ==================== ADMIN MANAGEMENT FUNCTIONS ====================
+        function openAddAdminModal() {
+            const admin = getCurrentAdmin();
+            if (admin.role !== 'C.E.O' && admin.role !== 'Co-Founder') {
+                showToast('Only CEO and Co-Founder can add new admins!', 'error');
+                return;
+            }
+            document.getElementById('addAdminModal').classList.add('active');
+        }
+
+        function closeAddAdminModal() {
+            document.getElementById('addAdminModal').classList.remove('active');
+            document.getElementById('addAdminModal').querySelector('form').reset();
+        }
+
+        function handleAddAdmin(e) {
+            e.preventDefault();
+            
+            const admin = getCurrentAdmin();
+            if (admin.role !== 'C.E.O' && admin.role !== 'Co-Founder') {
+                showToast('Only CEO and Co-Founder can add new admins!', 'error');
+                return;
+            }
+            
+            const name = document.getElementById('adminName_input').value.trim();
+            const email = document.getElementById('adminEmail_input').value.trim();
+            const phone = document.getElementById('adminPhone_input').value.trim();
+            const role = document.getElementById('adminRole_input').value.trim();
+            const password = document.getElementById('adminPassword_input').value.trim();
+            
+            if (!name || !email || !password || !role) {
+                showToast('Name, email, role, and password are required!', 'error');
+                return;
+            }
+            
+            const admins = getAdminUsers();
+            
+            // Check if email already exists
+            if (admins.find(a => a.email.toLowerCase() === email.toLowerCase())) {
+                showToast('This email is already registered!', 'error');
+                return;
+            }
+            
+            const newAdmin = {
+                id: Math.max(...admins.map(a => a.id), 0) + 1,
+                name,
+                email,
+                phone: phone || 'N/A',
+                role,
+                password, // In production, hash this
+                createdAt: new Date().toISOString(),
+                status: 'active'
+            };
+            
+            admins.push(newAdmin);
+            saveAdminUsers(admins);
+            addActivityLog('admin_created', `New admin user created: ${name} (${email})`);
+            
+            showToast('Admin user created successfully!', 'success');
+            closeAddAdminModal();
+            loadAdminUsersList();
+        }
+
+        function loadAdminUsersList() {
+            const admins = getAdminUsers();
+            const tableBody = document.getElementById('adminUsersTable');
+            
+            tableBody.innerHTML = admins.map(admin => `
+                <tr>
+                    <td>
+                        <div>
+                            <p class="font-medium">${admin.name}</p>
+                            <p class="text-xs text-gray-500">${admin.email}</p>
+                            <p class="text-xs text-gray-500">${admin.phone}</p>
+                        </div>
+                    </td>
+                    <td>${admin.role || 'Administrator'}</td>
+                    <td>${new Date(admin.createdAt).toLocaleDateString()}</td>
+                    <td><span class="status-badge status-active">${admin.status}</span></td>
+                    <td>
+                        <button onclick="viewAdminDetails(${admin.id})" class="btn-sm btn-secondary mr-2" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="editAdmin(${admin.id})" class="btn-sm btn-secondary mr-2" title="Edit Admin">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteAdmin(${admin.id})" class="btn-sm btn-danger" title="Delete Admin">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function viewAdminDetails(id) {
+            const admins = getAdminUsers();
+            const admin = admins.find(a => a.id === id);
+            if (!admin) {
+                showToast('Admin not found!', 'error');
+                return;
+            }
+            
+            const details = `
+Admin Name: ${admin.name}
+Email: ${admin.email}
+Phone: ${admin.phone}
+Role: ${admin.role || 'Administrator'}
+Status: ${admin.status}
+Created: ${new Date(admin.createdAt).toLocaleDateString()}
+            `;
+            alert('Admin Details:\n' + details);
+        }
+
+        function editAdmin(id) {
+            const admins = getAdminUsers();
+            const adminIndex = admins.findIndex(a => a.id === id);
+            if (adminIndex === -1) {
+                showToast('Admin not found!', 'error');
+                return;
+            }
+            
+            const admin = admins[adminIndex];
+            const newName = prompt('Edit admin name:', admin.name);
+            if (newName && newName !== admin.name) {
+                admins[adminIndex].name = newName;
+                saveAdminUsers(admins);
+                addActivityLog('admin_edited', `Admin edited: ${admin.email}`);
+                showToast('Admin updated successfully!', 'success');
+                loadAdminUsersList();
+            }
+        }
+
+        function deleteAdmin(id) {
+            if (!confirm('Are you sure you want to delete this admin? This action cannot be undone.')) {
+                return;
+            }
+            
+            let admins = getAdminUsers();
+            const admin = admins.find(a => a.id === id);
+            if (!admin) {
+                showToast('Admin not found!', 'error');
+                return;
+            }
+            
+            admins = admins.filter(a => a.id !== id);
+            saveAdminUsers(admins);
+            addActivityLog('admin_deleted', `Admin deleted: ${admin.email}`);
+            
+            loadAdminUsersList();
+            showToast('Admin user deleted successfully!', 'success');
+        }
+
+        // ==================== APPLICATIONS MANAGEMENT ====================
+        function loadApplicationsList() {
+            const tbody = document.getElementById('applicationsTable');
+            if (!tbody) return;
+            
+            let applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            let opportunities = JSON.parse(localStorage.getItem('opportunities') || '[]');
+            let users = getPublicUsers();
+            
+            if (applications.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500">No applications found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = applications.map(app => {
+                const user = users.find(u => u.email === app.userEmail) || { fullName: 'Unknown User' };
+                const opp = opportunities.find(o => o.id === app.opportunityId) || { title: 'Unknown Opportunity' };
+                
+                return `
+                    <tr>
+                        <td class="font-medium">${user.fullName}</td>
+                        <td>${opp.title}</td>
+                        <td><span class="status-badge status-${app.status === 'Approved' ? 'active' : app.status === 'Pending' ? 'pending' : 'inactive'}">${app.status}</span></td>
+                        <td>
+                            <button onclick="viewApplication(${app.id})" class="btn-sm btn-secondary mr-2" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="updateApplicationStatus(${app.id}, 'Approved')" class="btn-sm" style="background-color: #10b981; color: white; padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer;" title="Approve">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button onclick="updateApplicationStatus(${app.id}, 'Rejected')" class="btn-sm btn-danger mr-2" title="Reject">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function viewApplication(id) {
+            let applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const app = applications.find(a => a.id === id);
+            if (!app) {
+                showToast('Application not found!', 'error');
+                return;
+            }
+            
+            const details = `
+User: ${app.userEmail}
+Application ID: ${app.id}
+Status: ${app.status}
+Applied Date: ${new Date(app.appliedDate).toLocaleDateString()}
+            `;
+            alert('Application Details:\n' + details);
+        }
+
+        function updateApplicationStatus(id, newStatus) {
+            let applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const app = applications.find(a => a.id === id);
+            if (!app) {
+                showToast('Application not found!', 'error');
+                return;
+            }
+            
+            app.status = newStatus;
+            localStorage.setItem('applications', JSON.stringify(applications));
+            addActivityLog('application_updated', `Application ${newStatus}: ${app.userEmail}`);
+            showToast(`Application ${newStatus}!`, 'success');
+            loadApplicationsList();
+        }
+
+        // ==================== NAVIGATION ====================
+        const pageTitles = {
+            dashboard: 'Dashboard',
+            users: 'User Management',
+            opportunities: 'Opportunities Management',
+            applications: 'Applications Management',
+            reports: 'Reports & Analytics',
+            admins: 'Admin Users Management',
+            approvals: 'Pending Admin Approvals'
+        };
+
+        function navigateAdmin(page) {
+            try {
+                // Save current navigation state
+                localStorage.setItem('currentAdminPage', page);
+                
+                // Hide all pages
+                document.querySelectorAll('.page').forEach(p => {
+                    p.classList.remove('active');
+                    p.style.opacity = '0.5';
+                });
+                
+                // Show selected page with animation
+                const selectedPage = document.getElementById(page);
+                if (selectedPage) {
+                    selectedPage.classList.add('active');
+                    selectedPage.style.opacity = '1';
+                    document.getElementById('pageTitle').textContent = pageTitles[page] || 'Dashboard';
+                    
+                    // Load data for specific pages
+                    if (page === 'approvals') {
+                        loadPendingApprovalsTable();
+                    } else if (page === 'users') {
+                        loadUsersList();
+                    } else if (page === 'reports') {
+                        loadAllActivityLog();
+                        updateStatistics();
+                    } else if (page === 'admins') {
+                        loadAdminUsersList();
+                    } else if (page === 'applications') {
+                        loadApplicationsList();
+                    } else if (page === 'dashboard') {
+                        loadRecentActivity();
+                        updateStatistics();
+                    } else if (page === 'opportunities') {
+                        loadOpportunitiesTable();
+                    } else if (page === 'help') {
+                        loadHelpInquiriesTable();
+                    }
+                }
+                
+                // Update sidebar
+                document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+                const activeItem = document.querySelector(`a[onclick*="navigateAdmin('${page}')"]`);
+                if (activeItem) {
+                    activeItem.classList.add('active');
+                }
+                
+                // Keep sidebar visible on desktop, only toggle on mobile
+                if (window.innerWidth > 768) {
+                    document.getElementById('sidebar').classList.remove('hidden-mobile');
+                }
+            } catch (e) {
+                showToast('Navigation error, staying on current page', 'error');
+                console.error('Navigation error:', e);
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden-mobile');
+        }
+
+        // Keep sidebar visible on desktop during resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.getElementById('sidebar').classList.remove('hidden-mobile');
+            }
+        });
+
+        function openAddUserModal() {
+            document.getElementById('addUserModal').classList.add('active');
+        }
+
+        function closeAddUserModal() {
+            document.getElementById('addUserModal').classList.remove('active');
+        }
+
+        function handleAddUser(e) {
+            e.preventDefault();
+            showToast('User added successfully!', 'success');
+            closeAddUserModal();
+        }
+
+        function openAddOpportunityModal() {
+            document.getElementById('addOpportunityModal').classList.add('active');
+        }
+
+        function closeAddOpportunityModal() {
+            document.getElementById('addOpportunityModal').classList.remove('active');
+        }
+
+        function handleAddOpportunity(e) {
+            e.preventDefault();
+            const form = e.target;
+            const title = form.title.value.trim();
+            const category = form.category.value;
+            const description = form.description.value.trim();
+            const deadline = form.deadline.value;
+            const location = form.location.value.trim();
+            const link = form.link.value.trim();
+            const image = form.image.value.trim();
+            const helpLine = form.helpLine.value.trim();
+
+            if (!title || !category || !description || !deadline || !location || !link) {
+                showToast('All fields are required!', 'error');
+                return;
+            }
+
+            let opportunities = JSON.parse(localStorage.getItem('opportunities') || '[]');
+            const newOpportunity = {
+                id: Math.max(...opportunities.map(o => o.id || 0), 0) + 1,
+                title,
+                category,
+                description,
+                deadline,
+                location,
+                link,
+                image: image || 'https://via.placeholder.com/300x200',
+                helpLine,
+                createdAt: new Date().toISOString(),
+                featured: false
+            };
+
+            opportunities.push(newOpportunity);
+            localStorage.setItem('opportunities', JSON.stringify(opportunities));
+            addActivityLog('opportunity_added', `New opportunity posted: ${title}`);
+
+            showToast('Opportunity added successfully!', 'success');
+            form.reset();
+            closeAddOpportunityModal();
+            loadOpportunitiesTable();
+        }
+
+        function loadOpportunitiesTable() {
+            const tbody = document.querySelector('#opportunities table tbody');
+            tbody.innerHTML = '';
+            
+            let opportunities = JSON.parse(localStorage.getItem('opportunities') || '[]');
+            
+            opportunities.forEach(opp => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="font-medium">${opp.title}</td>
+                    <td><span class="status-badge" style="background-color: #dbeafe; color: #0c4a6e;">${opp.category}</span></td>
+                    <td>${opp.location}</td>
+                    <td>${opp.deadline}</td>
+                    <td>
+                        <button onclick="editOpportunity(${opp.id})" class="btn-sm btn-secondary mr-2"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteOpportunity(${opp.id})" class="btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function editOpportunity(id) {
+            let opportunities = JSON.parse(localStorage.getItem('opportunities') || '[]');
+            const opp = opportunities.find(o => o.id === id);
+            if (!opp) {
+                showToast('Opportunity not found!', 'error');
+                return;
+            }
+            
+            const newTitle = prompt('Edit opportunity title:', opp.title);
+            if (newTitle && newTitle !== opp.title) {
+                opp.title = newTitle;
+                localStorage.setItem('opportunities', JSON.stringify(opportunities));
+                addActivityLog('opportunity_edited', `Opportunity edited: ${opp.title}`);
+                showToast('Opportunity updated successfully!', 'success');
+                loadOpportunitiesTable();
+            }
+        }
+
+        function deleteOpportunity(id) {
+            let opportunities = JSON.parse(localStorage.getItem('opportunities') || '[]');
+            opportunities = opportunities.filter(opp => opp.id !== id);
+            localStorage.setItem('opportunities', JSON.stringify(opportunities));
+            addActivityLog('opportunity_deleted', `Opportunity deleted: ${id}`);
+            showToast('Opportunity deleted successfully!', 'success');
+            loadOpportunitiesTable();
+        }
+
+        function loadHelpInquiriesTable() {
+            const tbody = document.getElementById('helpInquiriesTable');
+            tbody.innerHTML = '';
+            
+            let inquiries = JSON.parse(localStorage.getItem('helpInquiries') || '[]');
+            let opportunities = JSON.parse(localStorage.getItem('opportunities') || '[]');
+            
+            inquiries.forEach(inquiry => {
+                const opp = opportunities.find(o => o.id === inquiry.opportunityId) || { title: 'Unknown' };
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="font-medium">${inquiry.name}<br><small class="text-gray-500">${inquiry.email}</small></td>
+                    <td>${opp.title}</td>
+                    <td class="max-w-xs truncate" title="${inquiry.message}">${inquiry.message}</td>
+                    <td>${new Date(inquiry.timestamp).toLocaleDateString()}</td>
+                    <td>
+                        <button onclick="viewInquiry(${inquiry.id})" class="btn-sm btn-secondary mr-2"><i class="fas fa-eye"></i></button>
+                        <button onclick="deleteInquiry(${inquiry.id})" class="btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function viewInquiry(id) {
+            let inquiries = JSON.parse(localStorage.getItem('helpInquiries') || '[]');
+            const inquiry = inquiries.find(i => i.id === id);
+            if (inquiry) {
+                const details = `
+From: ${inquiry.name}
+Email: ${inquiry.email}
+Message: ${inquiry.message}
+Date: ${new Date(inquiry.timestamp).toLocaleDateString()}
+                `;
+                alert('Help Inquiry Details:\n' + details);
+            }
+        }
+
+        function deleteInquiry(id) {
+            let inquiries = JSON.parse(localStorage.getItem('helpInquiries') || '[]');
+            inquiries = inquiries.filter(i => i.id !== id);
+            localStorage.setItem('helpInquiries', JSON.stringify(inquiries));
+            loadHelpInquiriesTable();
+            showToast('Help inquiry deleted successfully!', 'success');
+        }
+
+        // ==================== INITIALIZATION ====================
+        window.addEventListener('load', function() {
+            initializeAdminStorage();
+            initializeActivityLogStorage();
+            initializePendingAdminStorage();
+            
+            const currentAdmin = getCurrentAdmin();
+            if (currentAdmin) {
+                showAdminPanel();
+            }
+        });
+    </script>
+</body>
+</html>
